@@ -64,7 +64,6 @@ def venues():
   def getShows(venue_id):
     now = datetime.now(tz=None)
     return len(Show.query.filter(Show.venue_id==venue_id).filter(Show.start_time>now).all())
-    # return len(number)
 
   def createVenueObj(id, name, num_upcoming_shows):
     return {
@@ -442,10 +441,7 @@ def shows():
     artist = Artist.query.get(show.artist_id)
     venue = Venue.query.get(show.venue_id)
     date = format_time(show.start_time)
-    # date = str(show.start_time.strftime('%A')) + ', ' + str(show.start_time.strftime('%d')) + ' ' + str(show.start_time.strftime('%B')) + ' ' + str(show.start_time.year) + ' ' + str(show.start_time.strftime('%I')) + ':' + str(show.start_time.strftime('%M')) + ' ' + str(show.start_time.strftime('%p'))
-    print(date)
-    # print(show.start_time.strftime('%A'), show.start_time.day, show.start_time.month, show.start_time.year)
-    # formattedDate = show.start_time.day
+
     #define a temporary obj with appropriate artist and venue fields to add to showsData
     temp = {
       "venue_id": show.venue_id,
