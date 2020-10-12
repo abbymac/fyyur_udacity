@@ -4,6 +4,7 @@ import dateutil.parser
 import babel
 import datetime
 import sys
+import calendar 
 
 from pytz import utc
 from flask import Flask, render_template, request, Response, flash, redirect, url_for, jsonify, abort
@@ -38,6 +39,10 @@ def format_datetime(value, format='medium'):
   return babel.dates.format_datetime(date, format)
 
 app.jinja_env.filters['datetime'] = format_datetime
+
+def format_time(time):
+    date = str(time.strftime('%A')) + ', ' + str(time.strftime('%d')) + ' ' + str(time.strftime('%B')) + ' ' + str(time.year) + ' ' + str(time.strftime('%I')) + ':' + str(time.strftime('%M')) + ' ' + str(time.strftime('%p'))
+    return date
 
 
 
@@ -124,7 +129,6 @@ def show_venue(venue_id):
       'start_time': start_time
     }
   error = False
-
   try:
     all_past_shows = db.session.query(Artist, Show).join(Show).join(Venue).\
       filter(
@@ -195,7 +199,7 @@ def create_venue_submission():
     for att in form: 
       if(att.name != 'csrf_token' and att.name != 'genres'):
         props[att.name] = att.data
-
+    
     props['genres'] = form.genres.data
     venue = Venue(**props)
     db.session.add(venue)
@@ -283,8 +287,9 @@ def show_artist(artist_id):
   for show in shows:
     temp_show = {}
     venue = Venue.query.get(show.venue_id)
+    start_time = format_time(show.start_time)
     temp_show = {
-      "start_time": show.start_time,
+      "start_time": start_time,
       "venue_id": show.venue_id,
       "venue_image_link": venue.image_link,
       "venue_name": venue.name
@@ -304,8 +309,6 @@ def show_artist(artist_id):
 def edit_artist(artist_id):
   artist = Artist.query.get(artist_id)
   form = ArtistForm(obj=artist)
-  default_genres = artist.genres.replace("{","").replace("}","").split(",")
-  form.genres.data = default_genres
 
   return render_template('forms/edit_artist.html', form=form, artist=artist)
 
@@ -344,8 +347,6 @@ def edit_artist_submission(artist_id):
 def edit_venue(venue_id):
   venue = Venue.query.get(venue_id)
   form = VenueForm(obj=venue)
-  default_genres = venue.genres.replace("{","").replace("}","").split(",")
-  form.genres.data = default_genres
 
   return render_template('forms/edit_venue.html', form=form, venue=venue)
 
@@ -356,6 +357,7 @@ def edit_venue_submission(venue_id):
   venue = Venue.query.get(venue_id)
 
   try: 
+      #define changes in venue
       venue.name=form.name.data
       venue.city=form.city.data
       venue.address=form.address.data
@@ -393,8 +395,8 @@ def create_artist_form():
 def create_artist_submission():  
   error = False
   form = ArtistForm(request.form)
-
   try:
+    #create new artist with form information
     artist = Artist(
       name=form.name.data,
       city=form.city.data,
@@ -431,6 +433,7 @@ def create_artist_submission():
 @app.route('/shows')
 def shows():
 
+  #get all shows
   shows = Show.query.all()
   showsData = []
 
@@ -438,13 +441,19 @@ def shows():
     temp = {}
     artist = Artist.query.get(show.artist_id)
     venue = Venue.query.get(show.venue_id)
+    date = format_time(show.start_time)
+    # date = str(show.start_time.strftime('%A')) + ', ' + str(show.start_time.strftime('%d')) + ' ' + str(show.start_time.strftime('%B')) + ' ' + str(show.start_time.year) + ' ' + str(show.start_time.strftime('%I')) + ':' + str(show.start_time.strftime('%M')) + ' ' + str(show.start_time.strftime('%p'))
+    print(date)
+    # print(show.start_time.strftime('%A'), show.start_time.day, show.start_time.month, show.start_time.year)
+    # formattedDate = show.start_time.day
+    #define a temporary obj with appropriate artist and venue fields to add to showsData
     temp = {
       "venue_id": show.venue_id,
       "venue_name": venue.name,
       "artist_id": show.artist_id,
       "artist_name": artist.name,
       "artist_image_link": artist.image_link,
-      "start_time": show.start_time
+      "start_time": date
     }
     showsData.append(temp)
     
@@ -461,6 +470,7 @@ def create_show_submission():
   form = ShowForm(request.form)
   
   try:
+    #create new show based on form data
     show = Show(
       artist_id=form.artist_id.data,
       venue_id=form.venue_id.data,

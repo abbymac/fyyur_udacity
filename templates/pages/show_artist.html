@@ -5,10 +5,15 @@ endblock %} {% block content %}
     <h1 class="monospace">{{ artist.name }}</h1>
     <p class="subtitle">ID: {{ artist.id }}</p>
     <div class="genres">
-      {% for genre in artist.genres %}
+      {% for genre in artist.test %}
       <span class="genre">{{ genre }}</span>
       {% endfor %}
     </div>
+    <!-- <div class="genres">
+      {% for genre in artist.genres %}
+      <span class="genre">{{ genre }}</span>
+      {% endfor %}
+    </div> -->
     <p>
       <i class="fas fa-globe-americas"></i> {{ artist.city }}, {{ artist.state
       }}
